@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 import type { SiteSettings } from '@/lib/types';
 
 const STORAGE_KEY = 'mohands_site_settings';
@@ -85,8 +86,10 @@ const defaultSiteSettingsContextValue: SiteSettingsContextValue = {
 const SiteSettingsContext = createContext<SiteSettingsContextValue>(defaultSiteSettingsContextValue);
 
 export function SiteSettingsProvider({ children }: { children: React.ReactNode }) {
+  const { session, profile, loading: authLoading } = useAuth();
   const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const canManageSettings = Boolean(session && profile?.is_admin);
 
   useEffect(() => {
     let isMounted = true;
@@ -144,13 +147,15 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
   }, []);
 
   useEffect(() => {
-    if (!hasLoaded) return;
+    if (!hasLoaded || authLoading) return;
 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch {
       // Ignore storage failures
     }
+
+    if (!canManageSettings) return;
 
     const syncToSupabase = async () => {
       try {
@@ -168,7 +173,7 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
     };
 
     void syncToSupabase();
-  }, [hasLoaded, settings]);
+  }, [authLoading, canManageSettings, hasLoaded, settings]);
 
   const updateSettings = (updates: Partial<SiteSettings>) => {
     setSettings((prev) => ({ ...prev, ...updates }));
@@ -182,6 +187,9 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
     } catch {
       // Ignore storage failures
     }
+
+    if (!canManageSettings) return;
+
     void supabase.from('site_settings').upsert(
       {
         id: SETTINGS_ROW_ID,

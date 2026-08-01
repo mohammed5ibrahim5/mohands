@@ -50,6 +50,23 @@ export default function AdminSettings() {
     color: settings.accentTextColor,
   };
   const accentTextStyle = { color: settings.accentColor };
+  const previewSurfaceStyle = {
+    backgroundColor: draft.pageBackgroundColor,
+    borderColor: `${draft.accentColor}33`,
+  };
+  const previewCardStyle = {
+    backgroundColor: draft.cardBackgroundColor,
+    borderColor: `${draft.accentColor}22`,
+  };
+  const previewButtonStyle = {
+    backgroundColor: draft.accentColor,
+    color: draft.accentTextColor,
+  };
+  const previewButtonClass = draft.buttonStyle === 'outline'
+    ? 'border border-current'
+    : draft.buttonStyle === 'rounded'
+      ? 'rounded-full'
+      : 'rounded-xl';
 
   const updateField = (field: keyof typeof draft, value: string | boolean) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -224,6 +241,78 @@ export default function AdminSettings() {
         </div>
 
         <div className="space-y-6">
+          <section className={sectionClass} style={sectionStyle}>
+            <div className="mb-4 flex items-center gap-2">
+              <Eye className="w-5 h-5" style={{ color: settings.accentColor }} />
+              <h2 className="text-lg font-bold text-stone-800">معاينة المتجر</h2>
+            </div>
+            <div className="rounded-3xl border p-4 shadow-inner" style={previewSurfaceStyle}>
+              <div className="overflow-hidden rounded-[1.75rem] border" style={previewCardStyle}>
+                <div className="flex items-center justify-between rounded-full border px-3 py-2 text-xs font-semibold" style={{ borderColor: `${draft.accentColor}44`, color: draft.accentColor, margin: '12px' }}>
+                  <span>{draft.announcementText || 'توصيل مجاني'}</span>
+                  <span>Live Preview</span>
+                </div>
+                <div className="space-y-4 p-4 sm:p-5">
+                  <div className="flex items-center justify-between rounded-2xl border border-stone-200 bg-white/80 px-3 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl text-lg font-bold" style={{ backgroundColor: draft.accentColor, color: draft.accentTextColor }}>
+                        ب
+                      </div>
+                      <div>
+                        <h3 className="font-serif text-lg font-bold text-stone-900">{draft.storeName}</h3>
+                        <p className="text-sm text-stone-500">{draft.storeTagline}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="rounded-full border border-stone-300 px-3 py-1 text-xs font-semibold text-stone-600">المتجر</div>
+                      <div className="rounded-full border border-stone-300 px-3 py-1 text-xs font-semibold text-stone-600">العروض</div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[1.5rem] p-4 sm:p-5" style={{ background: `linear-gradient(135deg, ${draft.accentColor}20 0%, ${draft.cardBackgroundColor} 100%)` }}>
+                    <p className="mb-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold" style={{ backgroundColor: `${draft.accentColor}22`, color: draft.accentColor }}>{draft.heroBadge || 'تشكيلة جديدة'}</p>
+                    <h4 className="font-serif text-2xl font-bold text-stone-900">{draft.heroTitle} <span style={{ color: draft.accentColor }}>{draft.heroTitleHighlight}</span></h4>
+                    <p className="mt-2 text-sm leading-6 text-stone-600">{draft.heroSubtitle}</p>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <button className={`px-4 py-2 text-sm font-semibold ${previewButtonClass}`} style={previewButtonStyle}>{draft.heroPrimaryCta}</button>
+                      <button className="rounded-xl border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700">{draft.heroSecondaryCta}</button>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {[draft.heroStat1Label, draft.heroStat2Label, draft.heroStat3Label].map((label, idx) => (
+                      <div key={label} className="rounded-2xl border border-stone-200 bg-white/80 p-3 text-center">
+                        <div className="text-lg font-bold" style={{ color: draft.accentColor }}>{['+5000', '+800', '4.9'][idx]}</div>
+                        <div className="text-sm text-stone-500">{label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-2xl border border-stone-200 bg-white/80 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <h5 className="font-semibold text-stone-800">أشهر المنتجات</h5>
+                      <span className="text-xs font-semibold" style={{ color: draft.accentColor }}>عرض كل شيء</span>
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {[{ title: 'أدوات مكتبية', price: '١٢٩ ج.م' }, { title: 'دفاتر فاخرة', price: '٨٩ ج.م' }].map((item, idx) => (
+                        <div key={item.title} className="rounded-2xl border border-stone-200 bg-white p-3 shadow-sm">
+                          <div className="mb-3 h-24 rounded-xl" style={{ background: idx === 0 ? `linear-gradient(135deg, ${draft.accentColor}22, #fff)` : 'linear-gradient(135deg, #fde68a, #fff)' }} />
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <h6 className="font-semibold text-stone-800">{item.title}</h6>
+                              <p className="text-sm text-stone-500">{draft.storeDescription}</p>
+                            </div>
+                            <span className="rounded-full px-3 py-1 text-sm font-semibold" style={{ backgroundColor: `${draft.accentColor}18`, color: draft.accentColor }}>{item.price}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section className={sectionClass} style={sectionStyle}>
             <div className="mb-4 flex items-center gap-2">
               <Palette className="w-5 h-5" style={{ color: settings.accentColor }} />

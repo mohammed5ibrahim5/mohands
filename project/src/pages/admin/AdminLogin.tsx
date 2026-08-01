@@ -40,14 +40,14 @@ export default function AdminLogin() {
               <label className="block text-sm font-medium text-stone-300 mb-1.5">البريد الإلكتروني</label>
               <div className="relative">
                 <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-500" />
-                <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pr-10 pl-4 py-3 rounded-xl bg-stone-900 border border-stone-700 text-white placeholder-stone-500 focus:outline-none focus:border-amber-500 transition-colors" placeholder="admin@mohandes-bakarnia.com" />
+                <input required type="email" name="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pr-10 pl-4 py-3 rounded-xl bg-stone-900 border border-stone-700 text-white placeholder-stone-500 focus:outline-none focus:border-amber-500 transition-colors" placeholder="admin@mohandes-bakarnia.com" />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-stone-300 mb-1.5">كلمة المرور</label>
               <div className="relative">
                 <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-500" />
-                <input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pr-10 pl-4 py-3 rounded-xl bg-stone-900 border border-stone-700 text-white placeholder-stone-500 focus:outline-none focus:border-amber-500 transition-colors" placeholder="••••••••" />
+                <input required type="password" name="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pr-10 pl-4 py-3 rounded-xl bg-stone-900 border border-stone-700 text-white placeholder-stone-500 focus:outline-none focus:border-amber-500 transition-colors" placeholder="••••••••" />
               </div>
             </div>
           </div>
