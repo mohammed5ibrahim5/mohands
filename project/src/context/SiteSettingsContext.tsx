@@ -76,7 +76,13 @@ interface SiteSettingsContextValue {
   resetSettings: () => void;
 }
 
-const SiteSettingsContext = createContext<SiteSettingsContextValue | undefined>(undefined);
+const defaultSiteSettingsContextValue: SiteSettingsContextValue = {
+  settings: defaultSiteSettings,
+  updateSettings: () => undefined,
+  resetSettings: () => undefined,
+};
+
+const SiteSettingsContext = createContext<SiteSettingsContextValue>(defaultSiteSettingsContextValue);
 
 export function SiteSettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
@@ -87,27 +93,39 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
 
     const loadSettings = async () => {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
         let initialSettings = defaultSiteSettings;
 
-        if (saved) {
-          const parsed = JSON.parse(saved) as Partial<SiteSettings>;
-          initialSettings = { ...defaultSiteSettings, ...parsed };
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved) as Partial<SiteSettings>;
+            initialSettings = { ...defaultSiteSettings, ...parsed };
+          }
+        } catch {
+          initialSettings = defaultSiteSettings;
         }
 
-        const { data, error } = await supabase
-          .from('site_settings')
-          .select('settings')
-          .eq('id', SETTINGS_ROW_ID)
-          .maybeSingle();
+        try {
+          const { data, error } = await supabase
+            .from('site_settings')
+            .select('settings')
+            .eq('id', SETTINGS_ROW_ID)
+            .maybeSingle();
 
-        if (!error && data?.settings) {
-          initialSettings = { ...initialSettings, ...(data.settings as Partial<SiteSettings>) };
+          if (!error && data?.settings) {
+            initialSettings = { ...initialSettings, ...(data.settings as Partial<SiteSettings>) };
+          }
+        } catch {
+          // Ignore failed Supabase sync; the UI still uses local defaults.
         }
 
         if (isMounted) {
           setSettings(initialSettings);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(initialSettings));
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(initialSettings));
+          } catch {
+            // Ignore storage failures
+          }
         }
       } catch {
         // Ignore malformed storage or failed sync
@@ -128,7 +146,11 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (!hasLoaded) return;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    } catch {
+      // Ignore storage failures
+    }
 
     const syncToSupabase = async () => {
       try {
@@ -155,7 +177,11 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
   const resetSettings = () => {
     const nextSettings = defaultSiteSettings;
     setSettings(nextSettings);
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore storage failures
+    }
     void supabase.from('site_settings').upsert(
       {
         id: SETTINGS_ROW_ID,
@@ -163,7 +189,7 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'id' }
-    );
+    ).catch(() => undefined);
   };
 
   const value = useMemo(() => ({ settings, updateSettings, resetSettings }), [settings]);
@@ -172,7 +198,5 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
 }
 
 export function useSiteSettings() {
-  const context = useContext(SiteSettingsContext);
-  if (!context) throw new Error('useSiteSettings must be used within SiteSettingsProvider');
-  return context;
+  return useContext(SiteSettingsContext);
 }
