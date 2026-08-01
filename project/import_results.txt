@@ -1,0 +1,16 @@
+=== Importing categories ===
+categories: INSERTED 5 rows
+--- Then subcategories ---
+categories: INSERTED 16 rows
+
+=== Importing products ===
+products: INSERTED 25 rows
+
+=== Importing reviews ===
+reviews: INSERTED 12 rows
+
+=== Importing wishlist ===
+wishlist: SKIPPED (0 rows)
+
+=== Importing product_images ===
+product_images: SKIPPED (0 rows)

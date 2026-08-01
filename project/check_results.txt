@@ -1,0 +1,32 @@
+
+=== ipkzrmvdzdcxcdzvvatl (new) ===
+--- anon key ---
+categories: EXISTS (1 rows)
+products: EXISTS (1 rows)
+orders: MISSING (HTTP 401)
+order_items: MISSING (HTTP 401)
+reviews: EXISTS (1 rows)
+wishlist: EXISTS (0 rows)
+product_images: EXISTS (0 rows)
+profiles: EXISTS (0 rows)
+
+--- service_role key ---
+categories: EXISTS (1 rows)
+products: EXISTS (1 rows)
+orders: EXISTS (0 rows)
+order_items: EXISTS (0 rows)
+reviews: EXISTS (1 rows)
+wishlist: EXISTS (0 rows)
+product_images: EXISTS (0 rows)
+profiles: EXISTS (0 rows)
+
+=== grjbrhurvzzaerazsdsl (old) ===
+--- anon key ---
+categories: EXISTS (1 rows)
+products: EXISTS (1 rows)
+orders: MISSING (HTTP 401)
+order_items: MISSING (HTTP 401)
+reviews: EXISTS (1 rows)
+wishlist: EXISTS (0 rows)
+product_images: EXISTS (0 rows)
+profiles: EXISTS (0 rows)

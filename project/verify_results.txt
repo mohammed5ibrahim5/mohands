@@ -1,0 +1,6 @@
+categories: 21 rows
+products: 25 rows
+reviews: 12 rows
+wishlist: 0 rows
+products with category: 25/25
+products featured: 12
