@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
-import { SiteSettingsProvider } from '@/context/SiteSettingsContext';
+import { SiteSettingsProvider, useSiteSettings } from '@/context/SiteSettingsContext';
 import Navbar from '@/components/store/Navbar';
 import Footer from '@/components/store/Footer';
 import CartDrawer from '@/components/store/CartDrawer';
@@ -20,6 +20,7 @@ import AdminOrders from '@/pages/admin/AdminOrders';
 import AdminCategories from '@/pages/admin/AdminCategories';
 import AdminReviews from '@/pages/admin/AdminReviews';
 import AdminSettings from '@/pages/admin/AdminSettings';
+import FloatingContact from '@/components/store/FloatingContact';
 import { Loader2 } from 'lucide-react';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -30,8 +31,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function StoreLayout({ children }: { children: React.ReactNode }) {
+  const { settings } = useSiteSettings();
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: settings.pageBackgroundColor }}>
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
@@ -64,6 +67,7 @@ export default function App() {
               <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            <FloatingContact />
           </BrowserRouter>
           </SiteSettingsProvider>
         </WishlistProvider>

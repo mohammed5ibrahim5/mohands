@@ -53,8 +53,8 @@ export default function Footer() {
             </div>
             <p className="text-stone-400 text-sm leading-relaxed mb-5">{settings.footerDescription}</p>
             <div className="flex gap-3">
-              {[Instagram, Facebook, Twitter].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-full bg-stone-800 hover:bg-amber-500 hover:text-stone-900 flex items-center justify-center transition-all">
+              {[{ icon: Instagram, href: settings.socialInstagram }, { icon: Facebook, href: settings.socialFacebook }, { icon: Twitter, href: settings.socialTwitter }, { icon: Phone, href: settings.socialWhatsapp }].map(({ icon: Icon, href }, i) => (
+                <a key={i} href={href} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-stone-800 hover:bg-amber-500 hover:text-stone-900 flex items-center justify-center transition-all">
                   <Icon className="w-5 h-5" />
                 </a>
               ))}

@@ -1,7 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import type { SiteSettings } from '@/lib/types';
 
 const STORAGE_KEY = 'mohands_site_settings';
+const SETTINGS_ROW_ID = 1;
 
 export const defaultSiteSettings: SiteSettings = {
   storeName: 'المهندس (بكرنيه)',
@@ -17,6 +19,15 @@ export const defaultSiteSettings: SiteSettings = {
   heroSubtitle: 'اكتشف تشكيلتنا الواسعة من الأدوات المكتبية وقراطيس من أفضل العلامات التجارية العالمية. جودة استثنائية وأسعار تنافسية وتوصيل سريع.',
   heroPrimaryCta: 'تسوّق الآن',
   heroSecondaryCta: 'الدفاتر والمذكرات',
+  heroImageUrl: 'https://images.pexels.com/photos/6340707/pexels-photo-6340707.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  promoTitle: 'خصومات تصل إلى 40% على الأدوات المكتبية',
+  promoSubtitle: 'لفترة محدودة فقط! استمتع بخصومات حصرية على تشكيلة واسعة من منتجاتنا المميزة.',
+  promoCta: 'اطلب الآن قبل نفاد الكمية',
+  promoDiscountPercent: '40%',
+  socialInstagram: '#',
+  socialFacebook: '#',
+  socialTwitter: '#',
+  socialWhatsapp: 'https://wa.me/201001234567',
   heroStat1Value: '+5000',
   heroStat1Label: 'عميل سعيد',
   heroStat2Value: '+800',
@@ -33,6 +44,12 @@ export const defaultSiteSettings: SiteSettings = {
   feature4Description: 'ادفع وقت ما توصلك',
   newsletterTitle: 'انضم لنشرتنا البريدية',
   newsletterSubtitle: 'احصل على خصم 10% على أول طلب + عروض حصرية أسبوعياً',
+  aboutTitle: 'من نحن؟',
+  aboutDescription: 'نحن متجر متخصص في الأدوات المكتبية الفاخرة، ونحرص على توفير منتجات عالية الجودة مع خدمة عملاء مميزة وشحن موثوق.',
+  shippingTitle: 'الشحن والتوصيل',
+  shippingDescription: 'نوفر شحن سريع لجميع المحافظات، مع توصيل مجاني للطلبات التي تتجاوز 500 جنيه مصري.',
+  policyTitle: 'سياسات الإرجاع والاستبدال',
+  policyDescription: 'يمكنك إرجاع أو استبدال المنتج خلال 14 يومًا من تاريخ الاستلام إذا كان بحالة سليمة وغير مستخدم.',
   footerDescription: 'متجرك الأول للأدوات المكتبية الفاخرة في مصر. نوفّر منتجات عالية الجودة من أفضل العلامات التجارية العالمية بأسعار تنافسية.',
   footerNote: '© 2026 المهندس (بكرنيه). جميع الحقوق محفوظة.',
   accentColor: '#f59e0b',
@@ -40,6 +57,17 @@ export const defaultSiteSettings: SiteSettings = {
   showAnnouncementBar: true,
   showNewsletter: true,
   showTestimonials: true,
+  showAboutSection: true,
+  showNewArrivalsSection: true,
+  pageBackgroundColor: '#faf8f5',
+  cardBackgroundColor: '#ffffff',
+  cardRadius: 'rounded-2xl',
+  buttonStyle: 'filled',
+  heroLayout: 'classic',
+  showCategorySection: true,
+  showFeaturedSection: true,
+  showPromoSection: true,
+  sectionSpacing: 'normal',
 };
 
 interface SiteSettingsContextValue {
@@ -52,30 +80,90 @@ const SiteSettingsContext = createContext<SiteSettingsContextValue | undefined>(
 
 export function SiteSettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<SiteSettings>;
-        setSettings({ ...defaultSiteSettings, ...parsed });
+    let isMounted = true;
+
+    const loadSettings = async () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        let initialSettings = defaultSiteSettings;
+
+        if (saved) {
+          const parsed = JSON.parse(saved) as Partial<SiteSettings>;
+          initialSettings = { ...defaultSiteSettings, ...parsed };
+        }
+
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('settings')
+          .eq('id', SETTINGS_ROW_ID)
+          .maybeSingle();
+
+        if (!error && data?.settings) {
+          initialSettings = { ...initialSettings, ...(data.settings as Partial<SiteSettings>) };
+        }
+
+        if (isMounted) {
+          setSettings(initialSettings);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(initialSettings));
+        }
+      } catch {
+        // Ignore malformed storage or failed sync
+      } finally {
+        if (isMounted) {
+          setHasLoaded(true);
+        }
       }
-    } catch {
-      // Ignore malformed storage
-    }
+    };
+
+    void loadSettings();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
+    if (!hasLoaded) return;
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  }, [settings]);
+
+    const syncToSupabase = async () => {
+      try {
+        await supabase.from('site_settings').upsert(
+          {
+            id: SETTINGS_ROW_ID,
+            settings,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'id' }
+        );
+      } catch {
+        // Ignore sync failures; the UI still works locally
+      }
+    };
+
+    void syncToSupabase();
+  }, [hasLoaded, settings]);
 
   const updateSettings = (updates: Partial<SiteSettings>) => {
     setSettings((prev) => ({ ...prev, ...updates }));
   };
 
   const resetSettings = () => {
-    setSettings(defaultSiteSettings);
+    const nextSettings = defaultSiteSettings;
+    setSettings(nextSettings);
     localStorage.removeItem(STORAGE_KEY);
+    void supabase.from('site_settings').upsert(
+      {
+        id: SETTINGS_ROW_ID,
+        settings: nextSettings,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'id' }
+    );
   };
 
   const value = useMemo(() => ({ settings, updateSettings, resetSettings }), [settings]);

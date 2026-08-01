@@ -121,6 +121,15 @@ export interface SiteSettings {
   heroSubtitle: string;
   heroPrimaryCta: string;
   heroSecondaryCta: string;
+  heroImageUrl: string;
+  promoTitle: string;
+  promoSubtitle: string;
+  promoCta: string;
+  promoDiscountPercent: string;
+  socialInstagram: string;
+  socialFacebook: string;
+  socialTwitter: string;
+  socialWhatsapp: string;
   heroStat1Value: string;
   heroStat1Label: string;
   heroStat2Value: string;
@@ -137,6 +146,12 @@ export interface SiteSettings {
   feature4Description: string;
   newsletterTitle: string;
   newsletterSubtitle: string;
+  aboutTitle: string;
+  aboutDescription: string;
+  shippingTitle: string;
+  shippingDescription: string;
+  policyTitle: string;
+  policyDescription: string;
   footerDescription: string;
   footerNote: string;
   accentColor: string;
@@ -144,6 +159,17 @@ export interface SiteSettings {
   showAnnouncementBar: boolean;
   showNewsletter: boolean;
   showTestimonials: boolean;
+  showAboutSection: boolean;
+  showNewArrivalsSection: boolean;
+  pageBackgroundColor: string;
+  cardBackgroundColor: string;
+  cardRadius: 'rounded-2xl' | 'rounded-3xl' | 'rounded-none';
+  buttonStyle: 'filled' | 'outline' | 'rounded';
+  heroLayout: 'classic' | 'split' | 'minimal';
+  showCategorySection: boolean;
+  showFeaturedSection: boolean;
+  showPromoSection: boolean;
+  sectionSpacing: 'compact' | 'normal' | 'spacious';
 }
 
 export function getSessionId(): string {
