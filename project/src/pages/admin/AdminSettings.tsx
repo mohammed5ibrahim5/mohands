@@ -3,7 +3,7 @@ import { Save, RotateCcw, Palette, Type, Eye, EyeOff, Sparkles } from 'lucide-re
 import AdminLayout from '@/components/admin/AdminLayout';
 import { defaultSiteSettings, useSiteSettings } from '@/context/SiteSettingsContext';
 
-const sectionClass = 'rounded-2xl border border-stone-200 bg-white p-5 shadow-sm';
+const sectionClass = 'rounded-2xl border p-5 shadow-sm';
 
 export default function AdminSettings() {
   const { settings, updateSettings, resetSettings } = useSiteSettings();
@@ -19,10 +19,37 @@ export default function AdminSettings() {
     updateSettings(draft);
   };
 
-  const handleReset = () => {
-    resetSettings();
-    setDraft({ ...defaultSiteSettings });
+  const resetColorsToDefaults = () => {
+    const nextSettings = {
+      ...settings,
+      accentColor: defaultSiteSettings.accentColor,
+      accentTextColor: defaultSiteSettings.accentTextColor,
+      pageBackgroundColor: defaultSiteSettings.pageBackgroundColor,
+      cardBackgroundColor: defaultSiteSettings.cardBackgroundColor,
+    };
+    setDraft(nextSettings);
+    updateSettings(nextSettings);
   };
+
+  const resetDataToDefaults = () => {
+    const { accentColor, accentTextColor, pageBackgroundColor, cardBackgroundColor, ...dataDefaults } = defaultSiteSettings;
+    const nextSettings = {
+      ...settings,
+      ...dataDefaults,
+    };
+    setDraft(nextSettings);
+    updateSettings(nextSettings);
+  };
+
+  const sectionStyle = {
+    backgroundColor: settings.cardBackgroundColor,
+    borderColor: `${settings.accentColor}33`,
+  };
+  const accentButtonStyle = {
+    backgroundColor: settings.accentColor,
+    color: settings.accentTextColor,
+  };
+  const accentTextStyle = { color: settings.accentColor };
 
   const updateField = (field: keyof typeof draft, value: string | boolean) => {
     setDraft((prev) => ({ ...prev, [field]: value }));
@@ -32,30 +59,33 @@ export default function AdminSettings() {
     <AdminLayout>
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-stone-900">إعدادات المتجر</h1>
+          <h1 className="font-serif text-3xl font-bold text-stone-900" style={accentTextStyle}>إعدادات المتجر</h1>
           <p className="text-stone-500 mt-1">تحكم في الهوية البصرية والنصوص والميزات الظاهرة للموقع من مكان واحد.</p>
         </div>
-        <div className="flex gap-3">
-          <button onClick={handleReset} className="flex items-center gap-2 rounded-full border border-stone-300 px-4 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-100">
-            <RotateCcw className="w-4 h-4" /> إعادة تعيين
+        <div className="flex flex-wrap gap-3">
+          <button onClick={resetColorsToDefaults} className="flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition hover:bg-stone-100" style={{ borderColor: `${settings.accentColor}55`, color: settings.accentColor }}>
+            <Palette className="w-4 h-4" /> إعادة الألوان
           </button>
-          <button onClick={handleSave} className="flex items-center gap-2 rounded-full bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-700">
+          <button onClick={resetDataToDefaults} className="flex items-center gap-2 rounded-full border border-stone-300 px-4 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-100">
+            <RotateCcw className="w-4 h-4" /> إعادة البيانات
+          </button>
+          <button onClick={handleSave} className="flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition" style={accentButtonStyle}>
             <Save className="w-4 h-4" /> حفظ التغييرات
           </button>
         </div>
       </div>
 
       {unsaved && (
-        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+        <div className="mb-6 rounded-2xl border px-4 py-3 text-sm font-medium" style={{ backgroundColor: `${settings.accentColor}16`, borderColor: `${settings.accentColor}44`, color: settings.accentColor }}>
           توجد تغييرات غير محفوظة. اضغط على حفظ للتطبيق على المتجر فوراً.
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
-          <section className={sectionClass}>
+          <section className={sectionClass} style={sectionStyle}>
             <div className="mb-4 flex items-center gap-2">
-              <Type className="w-5 h-5 text-amber-600" />
+              <Type className="w-5 h-5" style={{ color: settings.accentColor }} />
               <h2 className="text-lg font-bold text-stone-800">الهوية الأساسية</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
@@ -86,9 +116,9 @@ export default function AdminSettings() {
             </div>
           </section>
 
-          <section className={sectionClass}>
+          <section className={sectionClass} style={sectionStyle}>
             <div className="mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-600" />
+              <Sparkles className="w-5 h-5" style={{ color: settings.accentColor }} />
               <h2 className="text-lg font-bold text-stone-800">النصوص الرئيسية</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
@@ -127,9 +157,9 @@ export default function AdminSettings() {
             </div>
           </section>
 
-          <section className={sectionClass}>
+          <section className={sectionClass} style={sectionStyle}>
             <div className="mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-600" />
+              <Sparkles className="w-5 h-5" style={{ color: settings.accentColor }} />
               <h2 className="text-lg font-bold text-stone-800">بنر الخصومات ووسائل التواصل</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
@@ -194,9 +224,9 @@ export default function AdminSettings() {
         </div>
 
         <div className="space-y-6">
-          <section className={sectionClass}>
+          <section className={sectionClass} style={sectionStyle}>
             <div className="mb-4 flex items-center gap-2">
-              <Palette className="w-5 h-5 text-amber-600" />
+              <Palette className="w-5 h-5" style={{ color: settings.accentColor }} />
               <h2 className="text-lg font-bold text-stone-800">الألوان والتنسيق</h2>
             </div>
             <div className="space-y-4">
@@ -243,9 +273,9 @@ export default function AdminSettings() {
             </div>
           </section>
 
-          <section className={sectionClass}>
+          <section className={sectionClass} style={sectionStyle}>
             <div className="mb-4 flex items-center gap-2">
-              <Eye className="w-5 h-5 text-amber-600" />
+              <Eye className="w-5 h-5" style={{ color: settings.accentColor }} />
               <h2 className="text-lg font-bold text-stone-800">العناصر الظاهرة</h2>
             </div>
             <div className="space-y-3">
