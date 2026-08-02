@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Loader2, ArrowLeft, Store } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLogin() {
-  const { signIn } = useAuth();
+  const { signIn, session, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && session) navigate('/admin/dashboard');
+  }, [authLoading, session, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

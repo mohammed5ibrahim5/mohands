@@ -1,23 +1,37 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, User, Loader2, ArrowLeft, Store } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function CustomerAuth() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, session, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<'login' | 'signup'>('signup');
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!authLoading && session) navigate('/checkout');
+  }, [authLoading, session, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     if (mode === 'signup') {
-      const { error } = await signUp(form.email, form.password, form.name);
+      const { error, needsEmailConfirmation } = await signUp(form.email, form.password, form.name);
       if (error) { setError(error); setLoading(false); }
+      else if (needsEmailConfirmation) {
+        // الحساب اتسجل. جرّب تسجيل الدخول مباشرة (لو التأكيد التلقائي مفعّل)
+        const { error: loginError } = await signIn(form.email, form.password);
+        if (loginError) {
+          setError('تم إنشاء حسابك بنجاح! سجّل الدخول الآن للمتابعة.');
+          setLoading(false);
+        } else {
+          navigate('/checkout');
+        }
+      }
       else navigate('/checkout');
     } else {
       const { error } = await signIn(form.email, form.password);

@@ -1,0 +1,9 @@
+Total users found: 5
+
+CONFIRMED: mohammed12@gmail.com (728b6b1d-2326-4626-bac3-a254d4c65816)
+CONFIRMED: mohamed2023@aiu.edu.eg (6b7c0c9e-5934-45ae-accd-1835942670a5)
+
+=== SUMMARY ===
+Confirmed: 2
+Already confirmed: 3
+Errors: 0

@@ -86,10 +86,6 @@ export default function Navbar() {
             <span className="hidden sm:inline">{settings.announcementText}</span>
             <span className="sm:hidden">{settings.announcementText}</span>
           </div>
-          <Link to="/admin" className="flex items-center gap-1.5 hover:text-amber-400 transition-colors">
-            <User className="w-3.5 h-3.5" />
-            <span>لوحة التحكم</span>
-          </Link>
         </div>
       </div>}
 
@@ -135,10 +131,13 @@ export default function Navbar() {
                 <Heart className="w-6 h-6 text-stone-700" />
                 {wishCount > 0 && <span className="absolute -top-0.5 -left-0.5 w-5 h-5 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center">{wishCount}</span>}
               </Link>
+            </nav>
+
+            <div className="flex items-center gap-2">
               {session ? (
                 <div className="relative group">
-                  <button className="flex items-center gap-2 p-2 rounded-full hover:bg-stone-100 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center text-amber-400 text-sm font-bold">{(profile?.full_name || session.user.email || 'م').charAt(0)}</div>
+                  <button className="relative p-2.5 rounded-full hover:bg-stone-100 transition-colors" aria-label="حسابي">
+                    <div className="w-6 h-6 rounded-full bg-stone-800 flex items-center justify-center text-amber-400 text-xs font-bold">{(profile?.full_name || session.user.email || 'م').charAt(0)}</div>
                   </button>
                   <div className="absolute top-full left-0 pt-3 z-50 hidden group-hover:block">
                     <div className="bg-white rounded-2xl shadow-2xl border border-stone-100 p-2 w-56 animate-scale-in">
@@ -154,13 +153,10 @@ export default function Navbar() {
                   </div>
                 </div>
               ) : (
-                <Link to="/auth" className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-stone-900 text-white font-bold text-sm hover:bg-stone-800 transition-all active:scale-95">
-                  <User className="w-4 h-4" /> دخول
+                <Link to="/auth" className="relative p-2.5 rounded-full hover:bg-stone-100 transition-colors" aria-label="تسجيل الدخول">
+                  <User className="w-6 h-6 text-stone-800" />
                 </Link>
               )}
-            </nav>
-
-            <div className="flex items-center gap-2">
               <button onClick={() => setIsOpen(true)} className="relative p-2.5 rounded-full hover:bg-stone-100 transition-colors" aria-label="السلة">
                 <ShoppingBag className="w-6 h-6 text-stone-800" />
                 {totalItems > 0 && <span className="absolute -top-0.5 -left-0.5 w-5 h-5 rounded-full text-white text-xs font-bold flex items-center justify-center animate-scale-in" style={{ backgroundColor: settings.accentColor, color: settings.accentTextColor }}>{totalItems}</span>}
