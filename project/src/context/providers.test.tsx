@@ -16,6 +16,12 @@ vi.mock('@/lib/supabase', () => ({
       upsert: vi.fn().mockResolvedValue({ error: null }),
     })),
   },
+  supabaseAdmin: {
+    from: vi.fn(() => ({
+      upsert: vi.fn().mockResolvedValue({ error: null }),
+    })),
+  },
+  isSupabaseConfigured: true,
 }));
 
 describe('context hooks', () => {

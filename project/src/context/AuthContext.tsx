@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabase, supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import type { Profile } from '@/lib/types';
 
 interface AuthContextValue {
@@ -66,6 +66,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string) => {
     setLoading(true);
     try {
+      // If Supabase isn't configured (e.g. env vars missing), fail gracefully.
+      if (!isSupabaseConfigured) {
+        setLoading(false);
+        return { error: 'تعذر الاتصال بالخادم. حاول مرة أخرى.' };
+      }
+
       // Create user via Admin API with email_confirm: true
       // → No confirmation email is sent, so no rate limit, and the user
       //   can sign in immediately after account creation.
@@ -103,10 +109,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: 'تعذر إنشاء الحساب. حاول مرة أخرى.' };
       }
 
-      // Ensure a profile row exists (trigger usually handles it, but be safe)
-      await supabaseAdmin
-        .from('profiles')
-        .upsert({ id: userId, full_name: fullName, is_admin: false }, { onConflict: 'id' });
+      // Ensure a profile row exists (trigger usually handles it, but be safe).
+      // Only possible when the service-role key is present.
+      if (supabaseAdmin) {
+        try {
+          await supabaseAdmin
+            .from('profiles')
+            .upsert({ id: userId, full_name: fullName, is_admin: false }, { onConflict: 'id' });
+        } catch {
+          // If the admin upsert fails, the trigger may still create the profile.
+          // Don't block signup on this.
+        }
+      }
 
       // Sign in automatically so the user enters immediately
       const { data: sessionData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
