@@ -24,9 +24,35 @@ import FloatingContact from '@/components/store/FloatingContact';
 import { Loader2 } from 'lucide-react';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { session, loading } = useAuth();
+  const { session, isAdmin, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-amber-500" /></div>;
   if (!session) return <Navigate to="/admin" replace />;
+  if (!isAdmin) {
+    // Signed-in but not an admin → don't bounce in a loop, show a clear message.
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-950 p-4">
+        <div className="bg-white/5 border border-stone-800 rounded-2xl p-8 max-w-md text-center">
+          <h1 className="font-serif text-2xl font-bold text-white mb-2">غير مصرح</h1>
+          <p className="text-stone-400 text-sm leading-relaxed mb-6">
+            هذا الحساب ليس لديه صلاحيات الأدمن. سجّل الخروج من الحساب الحالي ثم سجّل الدخول بحساب الأدمن.
+          </p>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={async () => {
+                const { supabase } = await import('@/lib/supabase');
+                await supabase.auth.signOut();
+                window.location.href = '/admin';
+              }}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-stone-900 font-bold py-3 rounded-xl transition-colors"
+            >
+              تسجيل الخروج من الحساب الحالي
+            </button>
+            <a href="/" className="text-stone-400 text-sm hover:text-amber-400 transition-colors">العودة للمتجر</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return <>{children}</>;
 }
 

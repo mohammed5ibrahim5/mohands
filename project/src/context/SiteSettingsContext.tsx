@@ -190,14 +190,20 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
 
     if (!canManageSettings) return;
 
-    void supabase.from('site_settings').upsert(
-      {
-        id: SETTINGS_ROW_ID,
-        settings: nextSettings,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'id' }
-    ).catch(() => undefined);
+    void (async () => {
+      try {
+        await supabase.from('site_settings').upsert(
+          {
+            id: SETTINGS_ROW_ID,
+            settings: nextSettings,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'id' }
+        );
+      } catch {
+        // Ignore sync failures; the UI still works locally
+      }
+    })();
   };
 
   const value = useMemo(() => ({ settings, updateSettings, resetSettings }), [settings]);

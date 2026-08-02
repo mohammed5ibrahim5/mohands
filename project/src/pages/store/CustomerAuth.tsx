@@ -20,18 +20,8 @@ export default function CustomerAuth() {
     setLoading(true);
     setError(null);
     if (mode === 'signup') {
-      const { error, needsEmailConfirmation } = await signUp(form.email, form.password, form.name);
+      const { error } = await signUp(form.email, form.password, form.name);
       if (error) { setError(error); setLoading(false); }
-      else if (needsEmailConfirmation) {
-        // الحساب اتسجل. جرّب تسجيل الدخول مباشرة (لو التأكيد التلقائي مفعّل)
-        const { error: loginError } = await signIn(form.email, form.password);
-        if (loginError) {
-          setError('تم إنشاء حسابك بنجاح! سجّل الدخول الآن للمتابعة.');
-          setLoading(false);
-        } else {
-          navigate('/checkout');
-        }
-      }
       else navigate('/checkout');
     } else {
       const { error } = await signIn(form.email, form.password);

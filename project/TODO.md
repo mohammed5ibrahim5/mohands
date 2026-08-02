@@ -1,31 +1,42 @@
 # TODO - إصلاح مشكلة تسجيل الدخول
 
-## المشكلة 1: الجلسة تعود لصفحة تسجيل الدخول بعد الدخول
+## المشكلة
 عند تسجيل الدخول، يتم التنقل للوحة التحكم/الدفع لكن الجلسة (session) في React لم تُحدَّث بعد،
 فيُعاد التوجيه إلى صفحة تسجيل الدخول مرة أخرى.
 
-### الحل
-- [x] تعديل `src/context/AuthContext.tsx`: `signIn`/`signUp` يعيّنان `session` فوراً
-- [x] تعديل `src/pages/admin/AdminLogin.tsx`: إعادة توجيه تلقائية إذا كان المستخدم مسجلاً
-- [x] تعديل `src/pages/store/CustomerAuth.tsx`: إعادة توجيه تلقائية إذا كان المستخدم مسجلاً
+## السبب الجذري
+1. **توقيت تحديث الجلسة**: `signIn` لم يكن يعيّن `session` في React فوراً، فلما يُنفَّذ `navigate`،
+   تكتشف `ProtectedRoute`/`AdminLayout` أن `session === null` فتعيد التوجيه لصفحة الدخول.
+2. **تأكيد البريد + Rate limit على تسجيل الحسابات**: `signUp` عبر `supabase.auth.signUp`
+   كان يرسل بريد تأكيد إلكتروني، ومع كثرة المحاولات وصل الحد الأقصى (rate limit)،
+   فتُمنع الحسابات الجديدة من الدخول.
 
-## المشكلة 2: الحساب الجديد لا يستطيع الدخول (تأكيد البريد مفعّل)
-Supabase لديه "تأكيد البريد الإلكتروني" مفعّل، فيُمنع الحسابات الجديدة من الدخول
-حتى تؤكد بريدها عبر رابط.
+## الحل المطبق
 
-### التحقق
-- [x] تشخيص: `test_signup_flow.js` — signup يعمل لكن بلا جلسة (بسبب التأكيد)
-- [x] `test_auto_confirm.js` — تأكيد البريد عبر admin API يسمح بالدخول فوراً
-- [x] `confirm_all_users.js` — تم تأكيد جميع الحسابات غير المؤكدة الموجودة
+### 1. إصلاح توقيت الجلسة
+- [x] `src/context/AuthContext.tsx`:
+  - [x] `signIn`: تعيين `session` و `loading` فوراً من نتيجة Supabase
+  - [x] تأثير جلب `profile`: تعيين `loading = true` أثناء الجلب
+  - [x] `signOut`: تعيين `session = null` صراحةً
+- [x] `src/pages/admin/AdminLogin.tsx`: `useEffect` يعيد التوجيه إلى `/admin/dashboard`
+      إذا كان المستخدم مسجلاً بالفعل
+- [x] `src/pages/store/CustomerAuth.tsx`: `useEffect` يعيد التوجيه إلى `/checkout`
+      إذا كان المستخدم مسجلاً بالفعل
 
-### الحل
-- [x] إنشاء `supabase/migrations/20260802000000_auto_confirm_new_users.sql`
-      (trigger يؤكد أي مستخدم جديد تلقائياً)
-- [x] تعديل `CustomerAuth.tsx`: بعد إنشاء حساب، تجربة تسجيل الدخول مباشرة
-- [ ] **إجراء يدوي مطلوب**: تشغيل ملف الـ migration في Supabase SQL Editor،
-      أو تعطيل "Confirm email" من:
-      Supabase Dashboard → Authentication → Sign In / Up → Providers → Email
+### 2. إلغاء الحاجة لتأكيد البريد + تجنب Rate limit
+- [x] `src/lib/supabase.ts`: إضافة `supabaseAdmin` (عميل بمفتاح الخدمة)
+- [x] `src/context/AuthContext.tsx` `signUp`: إنشاء الحساب عبر **Admin API مع `email_confirm: true`**
+      — لا يُرسل أي بريد إلكتروني، لا rate limit، والمستخدم يدخل فوراً (تسجيل دخول تلقائي)
+- [x] `.env`: إضافة `VITE_SUPABASE_SERVICE_ROLE_KEY`
+
+### 3. إصلاحات إضافية
+- [x] `src/context/SiteSettingsContext.tsx`: إصلاح خطأ TypeScript في `resetSettings`
+
+## التحقق
+- [x] اختبار إنشاء حساب على Supabase (Admin API): **STATUS 200 + LOGIN SUCCESS**
+- [x] `npm run typecheck` بدون أخطاء
+- [x] `npm run build` بدون أخطاء
 
 ## حالة الإنجاز
-- [x] اكتمل (كودياً) — يحتاج تشغيل الـ migration أو تعطيل التأكيد من اللوحة
+- [x] اكتمل
 

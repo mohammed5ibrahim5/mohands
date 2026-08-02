@@ -1,2 +1,0 @@
-ADMIN USER CREATED: admin@maktabti.com / Admin@123456
-PROFILE UPDATED is_admin=true (HTTP 204)
